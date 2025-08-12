@@ -16,7 +16,6 @@ class NodeResource extends JsonResource
             'parent_id' => $this->parent_id,
             'height' => (int) $this->height,
             'zip_code' => $this->zip_code,
-            'monthly_rent' => $this->monthly_rent !== null ? (float) $this->monthly_rent : null,
             'tenancy_active' => $this->tenancy_active,
             'moved_in_at' => $this->moved_in_at ? $this->moved_in_at->toDateString() : null,
             'created_by' => $this->created_by,

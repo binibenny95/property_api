@@ -9,6 +9,7 @@ use App\Models\Node;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\NodeResource;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -18,10 +19,10 @@ use App\Http\Resources\NodeResource;
  */
 class NodeController extends Controller
 {
-   public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
+//    public function __construct()
+//     {
+//         $this->middleware('auth:sanctum');
+//     }
 
 
     /**
@@ -95,8 +96,16 @@ class NodeController extends Controller
      */
     public function store(NodeRequest $request): JsonResponse
     {
+        Log::info('=== NodeController::store called ===', [
+        'method' => $request->method(),
+        'url' => $request->url(),
+        'user' => auth()->id(),
+        'input' => $request->all()
+    ]);
+
         $this->authorize('create', Node::class);
         $node = new Node($request->validated());
+
         if (!$node->validateParentType()) {
             return response()->json([
                 'error' => 'Invalid parent-child relationship'

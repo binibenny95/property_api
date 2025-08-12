@@ -15,7 +15,7 @@ class Node extends Model
         'parent_id',
         'relationship_to_parent',
         'height',
-        'zip-code',
+        'zip_code',
         'monthly_rent',
         'tenancy_active',
         'moved_in_at',
