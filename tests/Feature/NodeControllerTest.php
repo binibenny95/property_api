@@ -23,6 +23,7 @@ class NodeControllerTest extends TestCase
         $user = User::factory()->create(['is_admin' => false]);
         Sanctum::actingAs($user);
     }
+    // Test for creating root node.
     public function test_admin_can_create_corporation(): void
     {
         $this->actingAsAdmin();
@@ -48,7 +49,7 @@ class NodeControllerTest extends TestCase
         $res->assertStatus(403);
 
     }
-
+    // Test for creating a Building under a Corporation needs zip_code.
     public function test_building_requires_zip_code(): void
     {
         $this->actingAsAdmin();

@@ -51,7 +51,9 @@ return [
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
+            #'unix_socket' => env('DB_SOCKET', ''),
+            # In Docker, containers communicate over the network (even on the same host), not via Unix sockets. Hence force unix_socket to null or omit it.
+            'unix_socket' => null, // Force TCP connection, do not use socket
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
