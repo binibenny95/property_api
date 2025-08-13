@@ -20,76 +20,75 @@ A Laravel-based REST API for managing corporations, buildings, properties, tenan
 **API Testing** : Postman
 **PHP Version** : 8.1
 
-### Set up the project on your local repo
-    git clone git@github.com:binibenny95/property_api.git
+# Prerequisites
 
-    cd property_api
+- sudo access to a host with docker & docker-compose installed.
+- Git installed.
 
-    composer install
+# Usage
 
-    cp .env.example .env
+1. Clone the repository to your local host
 
-    php artisan key:generate
+        git clone git@github.com:binibenny95/property_api.git
 
+1. Change directory to repository's root folder
 
-#### Set Up the .env file
+        cd property_api
 
-    APP_NAME="Property Management API"
-    APP_ENV=local
-    APP_KEY=base64:your-generated-key
-    APP_DEBUG=true
-    APP_URL=http://localhost:8000
+1. Generate `.env` and `.env.testing` files using the example files provided.
 
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=property_api
-    DB_USERNAME=your_username
-    DB_PASSWORD=your_password
+        cp .env_example .env
+        cp .env.testing_example .env.testing
 
+    *NOTE: env files contain environment variables & values that are requred for application & DB. These fies are in .gitignore list.*
 
+1. Build and start the containers
 
-#### Set up testing database for unit tests in .env.testing
-    APP_ENV=testing
-    APP_DEBUG=true
+        sudo docker-compose up --build -d
 
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=property_api_test
-    DB_USERNAME=your_username
-    DB_PASSWORD=your_password
+1. Validate that the containers are started and running 
 
-## Database setup
-    run these commands on your terminal:
+        sudo docker ps
 
-    mysql -u username -p
+1. Install all PHP dependencies defined in composer.json file
 
-    CREATE DATABASE property_api; //for API testing
+        sudo docker-compose exec app composer install
 
-    CREATE DATABASE property_api_test; // for unit testing
+1. Execute DB migration files which will create or update tables & schema in the DB
 
-### Migrations
-    php artisan migrate 
+        sudo docker-compose exec app php artisan migrate
 
-## API Documentation
+1. Validate the DB migration status
 
-### Generate Swagger Documentation
+        sudo docker-compose exec app php artisan migrate:status
 
+1. Perform basic php validations 
 
-    # Install Swagger package
-    composer require darkaonline/l5-swagger
+        sudo docker-compose exec app php artisan --version
 
-    # Publish configuration
-    php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+        sudo docker-compose exec app php artisan route:list
 
-    # Generate documentation
-    php artisan l5-swagger:generate
+1. API should be now accessible at http://localhost:8000
 
+# Testing
 
-### Access Documentation
+1. Run complete test cases
 
-Visit: `http://localhost:8000/api/documentation`
+        sudo docker-compose exec app php artisan test
+
+1. Run specific test case 
+
+        sudo docker-compose exec app php artisan test tests/Feature/NodeControllerTest.php
+
+# API Documentation
+
+1. Publish configurations to Swagger 
+
+        sudo docker-compose exec app php artisan  vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+
+1. Generate documentation
+
+        sudo docker-compose exec app php artisan l5-swagger:generate   
 
 
 ## Authentication
