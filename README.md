@@ -198,14 +198,14 @@ Body (JSON):
 
 #### 2. **Login User**
 ```
-Method: POST
-URL: http://localhost:8000/api/login
-Headers: Content-Type: application/json
-Body (JSON):
-{
-  "email": "test@gmail.com",
-  "password": "test123@95"
-}
+    Method: POST
+    URL: http://localhost:8000/api/login
+    Headers: Content-Type: application/json
+    Body (JSON):
+    {
+    "email": "test@gmail.com",
+    "password": "test123@95"
+    }
 ```
 
 **Expected Response (200):**
@@ -250,7 +250,7 @@ Headers:
   }
 }
 
-#### 4. **Create Nodes** (Following Hierarchy)
+#### 4. **Create Nodes** 
 
 **A. Create Corporation (Root Node)**
     ```

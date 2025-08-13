@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-    // Node management routes
+    // Node routes
     Route::post('nodes', [NodeController::class, 'store']);
     Route::get('nodes/{node}/children', [NodeController::class, 'getChildren']);
     Route::put('nodes/{node}/change-parent', [NodeController::class, 'updateParent']);
