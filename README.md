@@ -1,31 +1,30 @@
 # PROPERTY API
 
-A Laravel-based REST API for managing corporations, buildings, properties, tenancy periods, and tenants.
+- A laravel based REST APi for managing Corporations , Buildings , Properties , Tenancy Periods and Tenants
+- The Project is completely containerized using Docker.
+
+## Technology Stack
+
+|  |  |
+|--------|----------|
+| Backend | PHP  |
+| Framework | Laravel |
+| Databse | MySQL |
+| Containers | Docker |
+| Authentication | Laravel Sanctum |
+| API Documentation | Swagger |
+| Testing | PHPUnit|
+| API Testing | Postman |
+|  |  |
 
 
-## Endpoints 
-1.Add a new node to the tree.
 
-2.Get all child nodes of a given node from the tree (only 1 layer of children).
-
-3.Change the parent node of a given node to another valid node.
-
-## Technology Stack 
-
-**Backend**: Laravel 10.48.29 
-**Database**:MySQL
-**Authentication**: Laravel Sanctum
-**API Documentation** : Swagger
-**Testing** : PHPUnit
-**API Testing** : Postman
-**PHP Version** : 8.1
-
-# Prerequisites
+## Prerequisites
 
 - sudo access to a host with docker & docker-compose installed.
 - Git installed.
 
-# Usage
+## Usage
 
 1. Clone the repository to your local host
 
@@ -70,7 +69,7 @@ A Laravel-based REST API for managing corporations, buildings, properties, tenan
 
 1. API should be now accessible at http://localhost:8000
 
-# Testing
+## Testing
 
 1. Run complete test cases
 
@@ -80,7 +79,7 @@ A Laravel-based REST API for managing corporations, buildings, properties, tenan
 
         sudo docker-compose exec app php artisan test tests/Feature/NodeControllerTest.php
 
-# API Documentation
+## API Documentation
 
 1. Publish configurations to Swagger 
 
@@ -89,21 +88,6 @@ A Laravel-based REST API for managing corporations, buildings, properties, tenan
 1. Generate documentation
 
         sudo docker-compose exec app php artisan l5-swagger:generate   
-
-
-## Authentication
-
-The API uses Laravel Sanctum for token-based authentication.
-
-### Authentication Flow
-
-1. **Register** or **Login** to get access token
-2. Include token in requests: `Authorization: Bearer {token}`.
-
-### User Roles
-
-- **Admin**: Can create, update, and delete nodes
-- **User**: Can only view nodes
 
 ## API Endpoints
 
@@ -125,22 +109,24 @@ The API uses Laravel Sanctum for token-based authentication.
 | PUT | `/api/nodes/{id}/parent` | Update node parent | Yes | Yes |
 
 
-## Task Logic
+## Business Requirements
 
-Corporation (root)->
-Building (requires zip_code)->
-Property (requires monthly_rent)->
-Tenancy Period (requires tenancy_active)->
-Tenant (requires move_in_date)
+### Node Hierarchy
 
+- Corporation → Building
+- Building → Property  
+- Property → Tenancy Period
+- Tenancy Period → Tenant
 
-### Validation Rules
+### Conditions
 
-1. **Parent-Child Relationships**: Each node type can only have specific parent types
-2. **Active Tenancy Limit**: Only one active tenancy period per property
-3. **Tenant Limit**: Maximum 4 tenants per tenancy period
-4. **Required Fields**: Each node type has specific required fields
-
+- Maximum 4 tenants per tenancy period
+- Only 1 active tenancy period per property
+- Buildings require zip_code
+- Properties require monthly_rent
+- Tenancy Periods require tenancy_active (boolean)
+- Tenants require move_in_date
+    
 ### Field Requirements by Node Type
 
 | Node Type | Required Fields |
@@ -151,324 +137,49 @@ Tenant (requires move_in_date)
 | Tenancy Period | name, type, parent_id, tenancy_active |
 | Tenant | name, type, parent_id, move_in_date |
 
-## Testing
+## Code Execution & Validations using Postman
 
-### Run Tests
+- Files from postman has been imported and kepy under the folder postman
+- Please refer to [Postman Steps](Postman_Steps.md) for detailed explanation on executing and validating the code using Postman.
+
+## Further Developments
+
+- Multi factor authentication setup using Laravel Fortify.
+- API to handle more granular Authorization Policies as explained below:
+
+    1. Have multiple user roles - Guest User, Tenant, Property Manager, Building Manager, Corporation Manager, Admin.
+    1. Guest User should ONLY be able to view Properties that are vacant.
+    1. Tenant should ONLY be able to view tenancy Period details of the Property. They should not be able to view other tenant's details.
+    1. Managers SHOULD have edit access to their respective node level and below. ie- Building manager should be able to edit details on Buildings, Properties , Tenancy period and tenants and should not be able to edit on Corporation.
+
+- Frontend view for this Project API.
+
+## Docker Setup
+
+- There are 4 different containers as mentioned below
+
+    1. PHP APP Container : Based of php:8.2-fpm base image and it contains composer also. Laravel and other dependencies are installed outside the container image using composer.json file
+    1. NGINX Container : Based of nginx:alpine base image. This container will server the Laravel app over HTTP
+    1. MySQL DB Container : Based of mysql:8.0 base image.
+    1. MySQL DB test Container: A dedicated container hosting test DB to run PHP tests
+
+- Containers are built using docker-compose.
+
+## Tips
+
+- Check the status of containers and make sure that they are UP
+        sudo docker ps
+
+- If you perform any changes to .env file especially DB related environment variables , then it is recommended to Shutdown the containers , remove the docker db volumes and then bring the containers back online
+
+        sudo docker-compose down;sudo docker volume rm property_api_db_data;sudo docker volume rm property_api_db_test_data;sudo docker-compose up -d
+
+- If you want to connect to Databases running in containers , use below commands
+
+        sudo docker-compose exec db mysql -u <username> -p <API DB Name>
+        sudo docker-compose exec db_test mysql -u <username> -p <API test DB Name>
+
+        
 
 
-    # Run all tests
-    php artisan test
 
-    # Run specific test file
-    php artisan test tests/Feature/NodeControllerTest.php
-
-# Run the solutions
-## Using postman
-I have imported files from postman .You can see that on postman folder.
-#### 1. **Register New User**
-```
-Method: POST
-URL: http://127.0.0.1:8000/api/v1/register
-Headers: Content-Type: application/json
-Body (JSON):
-{
-  "name": "Admin User",
-  "email": "admin@example.com",
-  "password": "password123",
-  "password_confirmation": "password123",
-  "is_admin": true
-}
-
-**Expected Response (201):**
-```json
-{
-  "status": "success",
-  "message": "User registered successfully",
-  "data": {
-    "user": {
-      "id": 1,
-      "name": "Admin User",
-      "email": "admin@example.com",
-      "is_admin": true
-    },
-    "token": "1|abcd1234efgh5678..."
-  }
-}
-
-#### 2. **Login User**
-```
-    Method: POST
-    URL: http://localhost:8000/api/login
-    Headers: Content-Type: application/json
-    Body (JSON):
-    {
-    "email": "test@gmail.com",
-    "password": "test123@95"
-    }
-```
-
-**Expected Response (200):**
-```json
-{
-  "status": "success",
-  "message": "Login successful",
-  "data": {
-    "user": {
-      "id": 4,
-      "name": "Test User",
-      "email": "test@gmail.com",
-      "is_admin": true
-    },
-    "token": "11|QlPHCRuERvjYRXEHwN7q5ZNiVRYvs50wAjxNyEYHa3d52ddb"
-  }
-}
-```
-
-### Copy the token from login add it to each API
-
-#### 3. **Get Current User Info**
-```
-Method: GET
-URL: http://localhost:8000/api/me
-Headers: 
-  Authorization: Bearer YOUR_TOKEN_HERE
-  Content-Type: application/json
-```
-
-**Expected Response (200):**
-```json
-{
-  "status": "success",
-  "data": {
-    "user": {
-      "id": 4,
-      "name": "Test User",
-      "email": "test@gmail.com",
-      "is_admin": true
-    }
-  }
-}
-
-#### 4. **Create Nodes** 
-
-**A. Create Corporation (Root Node)**
-    ```
-    Method: POST
-    URL: http://localhost:8000/api/nodes
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-    Body (JSON):
-    {
-    "name": "ABC Corporation",
-    "type": "Corporation"
-    }
-    ```
-
-    **B. Create Building (Child of Corporation)**
-    ```
-    Method: POST
-    URL: http://localhost:8000/api/nodes
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-    Body (JSON):
-    {
-    "name": "Main Building",
-    "type": "Building",
-    "parent_id": 1,
-    "zip_code": "12345"
-    }
-    ```
-
-    **C. Create Property (Child of Building)**
-    ```
-    Method: POST
-    URL: http://localhost:8000/api/nodes
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-    Body (JSON):
-    {
-    "name": "Apartment 101",
-    "type": "Property",
-    "parent_id": 2,
-    "monthly_rent": 1500.00
-    }
-    ```
-
-    **D. Create Tenancy Period (Child of Property)**
-    ```
-    Method: POST
-    URL: http://localhost:8000/api/nodes
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-    Body (JSON):
-    {
-    "name": "2025 Lease Period",
-    "type": "Tenancy Period",
-    "parent_id": 3,
-    "tenancy_active": true
-    }
-    ```
-
-    **E. Create Tenant (Child of Tenancy Period)**
-    ```
-    Method: POST
-    URL: http://localhost:8000/api/nodes
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-    Body (JSON):
-    {
-    "name": "John Doe",
-    "type": "Tenant",
-    "parent_id": 4,
-    "move_in_date": "2025-01-01"
-    }
-    ```
-
-    #### 5. **Get Child Nodes**
-    ```
-    Method: GET
-    URL: http://localhost:8000/api/nodes/{node_id}/children
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-
-    Example: http://localhost:8000/api/nodes/1/children
-    ```
-
-    **Expected Response (200):**
-    ```json
-    {
-    "data": [
-        {
-        "id": 2,
-        "name": "Main Building",
-        "type": "Building",
-        "parent_id": 1,
-        "height": 1,
-        "zip_code": "12345"
-        }
-    ]
-    }
-    ```
-
-    #### 6. **Update Node Parent**
-    ```
-    Method: PUT
-    URL: http://localhost:8000/api/nodes/{node_id}/change-parent
-    Headers: 
-    Authorization: Bearer YOUR_TOKEN_HERE
-    Content-Type: application/json
-
-    Example: http://localhost:8000/api/nodes/5/change-parent
-    Body (JSON):
-    {
-    "name": "John Doe",
-    "type": "Tenant",
-    "parent_id": 4,
-    "move_in_date": "2025-02-01"
-    }
-    ```
-
-### Validation Testing Scenarios
-
-#### Test Missing Required Fields
-
-**Missing zip_code for Building:**
-```json
-{
-  "name": "Test Building",
-  "type": "Building",
-  "parent_id": 1
-}
-```
-**Expected Error (422):**
-```json
-{
-  "message": "The given data was invalid.",
-  "errors": {
-    "zip_code": ["Zip code is required when creating a Building."]
-  }
-}
-```
-
-**Missing monthly_rent for Property:**
-```json
-{
-  "name": "Test Property",
-  "type": "Property",
-  "parent_id": 2
-}
-```
-
-**Missing tenancy_active for Tenancy Period:**
-```json
-{
-  "name": "Test Tenancy",
-  "type": "Tenancy Period",
-  "parent_id": 3
-}
-```
-
-**Missing move_in_date for Tenant:**
-```json
-{
-  "name": "Test Tenant",
-  "type": "Tenant",
-  "parent_id": 4
-}
-```
-
-#### Test Business Rule Violations
-
-**Too Many Tenants (5th tenant in same tenancy period):**
-```json
-{
-  "name": "5th Tenant",
-  "type": "Tenant",
-  "parent_id": 4,
-  "move_in_date": "2025-01-01"
-}
-```
-**Expected Error (422):**
-```json
-{
-  "status": "Tenancy rules violation",
-  "message": "Maximum of 4 tenants allowed per tenancy period"
-}
-```
-
-**Invalid Parent-Child Relationship:**
-```json
-{
-  "name": "Invalid Building",
-  "type": "Building",
-  "parent_id": 3,
-  "zip_code": "12345"
-}
-```
-**Expected Error (422):**
-```json
-{
-  "error": "Invalid parent-child relationship"
-}
-```
-### Node Hierarchy Rules
-
-**Valid Parent-Child Relationships:**
-- Corporation → Building
-- Building → Property  
-- Property → Tenancy Period
-- Tenancy Period → Tenant
-
-**Business Rules:**
-- Maximum 4 tenants per tenancy period
-- Only 1 active tenancy period per property
-- Buildings require zip_code
-- Properties require monthly_rent
-- Tenancy Periods require tenancy_active (boolean)
-- Tenants require move_in_date
